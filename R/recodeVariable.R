@@ -3,24 +3,28 @@
 #' Takes a variable and returns a numeric recoded version
 #' from 1-n unique values
 #'
-#' @param var A variable to be recoded 1-n
+#' @param variable A variable to be recoded 1-n
 #' @return A recoded variable
 #' @export
 
-recodeVariable <- function(var) {
-  
-  uniqueValues <- unique(var)
-  
+recode_variable <- function(variable, presort = TRUE) {
+
+  unique_values <- na.omit(unique(variable))
+
+  if (presort) unique_values %<>%
+    naturalsort::naturalsort()
+
   tryCatch(
     {
-      newVar <- car::recode(var, paste0(na.omit(uniqueValues), '=',
-                                        1:length(na.omit(uniqueValues)), collapse= ';'))
-      levels(newVar) <- uniqueValues
+      new_var <- paste0(unique_values, "=", seq_along(unique_values),
+                        collapse = ";") %>%
+        car::recode(variable, .)
+      levels(new_var) <- unique_values
       logger::log_info("Successfully recoded variable")
-      return(newVar)
+      return(new_var)
     },
-    error = function(e) { 
-      logger::log_error('Could not recode variable')
+    error = function(e) {
+      logger::log_error("Could not recode variable")
       break
     }
   )

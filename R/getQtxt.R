@@ -7,26 +7,25 @@
 #' @return The info contained in the attribute/s
 #' @export
 
-getInfo <- function(var, attr = c('questionText', 'generalInfo')) {
-  
+get_info <- function(var, attr = c("questionText", "generalInfo")) {
   assertive::assert_is_non_empty(attr)
-  
+
   logger::log_info(glue::glue('Pulling attribute data for ',
                               '{paste0(attr, collapse = " AND ")}'))
-  
-  tmp <- purrr::map(attr, function(attributeName) {
-    
-    attr(var, which = attributeName, exact = T)
-    
-  }) %>% 
-    purrr::set_names(attr) %>% 
+
+  tmp <- purrr::map(attr, function(attribute_name) {
+
+    attr(var, which = attribute_name, exact = TRUE)
+
+  }) %>%
+    purrr::set_names(attr) %>%
     .[!sapply(., is.null)]
-  
-  if(length(tmp) != length(attr)) logger::log_warn(
+
+  if (length(tmp) != length(attr)) logger::log_warn(
     glue::glue('Could not find attribute info for ',
                '{paste0(attr[!attr %in% names(tmp)], collapse = " OR ")}')
   )
-  
+
   return(tmp)
-  
+
 }
