@@ -9,17 +9,25 @@
 
 recode_variable <- function(variable, presort = TRUE) {
 
-  unique_values <- na.omit(unique(variable))
+  unique_values <- as.character(na.omit(unique(variable)))
 
   if (presort) unique_values %<>%
     naturalsort::naturalsort()
 
   tryCatch(
     {
-      new_var <- paste0(unique_values, "=", seq_along(unique_values),
-                        collapse = ";") %>%
-        car::recode(variable, .)
-      levels(new_var) <- unique_values
+
+      recodeString <- paste0("'", unique_values, "'", "=", seq_along(unique_values),
+                             collapse = ";")
+
+      new_var <- recodeString %>%
+        car::recode(as.character(variable), ., ) %>%
+        as.numeric()
+
+      levels(new_var) <- trimws(unique_values)
+
+      attr(new_var, 'recodeString') <- recodeString
+
       logger::log_info("Successfully recoded variable")
       return(new_var)
     },
